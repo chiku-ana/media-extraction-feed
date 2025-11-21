@@ -2,8 +2,9 @@ import { Ingester } from 'atingester'
 import events from 'events'
 import express from 'express'
 import http from 'http'
+import path from 'path'
 import { IdResolver } from '@atproto/identity'
-import { createDb, migrateToLatest } from './db'
+import { createMainDb } from './db'
 import { createServer } from './lexicon'
 import { ids } from './lexicon/lexicons'
 import describeGenerator from './methods/describe-generator'
@@ -33,8 +34,8 @@ export class FeedGenerator {
     const logger = createLogger(['Runner', 'Server'])
     logger.info('Creating server...')
 
-    logger.info(`Creating DB => ${env.FEEDGEN_SQLITE_LOCATION}`)
-    const db = createDb()
+    logger.info(`Creating DB => ${path.join(env.FEEDGEN_DATA_DIRECTORY, 'main.sqlite')}`)
+    const db = await createMainDb()
 
     const app = express()
     const idResolver = new IdResolver()
@@ -45,22 +46,14 @@ export class FeedGenerator {
       handleEvent: async (evt) => await handleEvent(evt, db),
       onInfo: ingesterLogger.info,
       onError: (err: Error) => ingesterLogger.error(err.message),
-      getCursor: async () => {
-        const res = await db
-          .selectFrom('sub_state')
-          .selectAll()
-          .where('service', '=', `${env.FEEDGEN_SUBSCRIPTION_MODE}:` + env[`FEEDGEN_SUBSCRIPTION_${env.FEEDGEN_SUBSCRIPTION_MODE.toUpperCase()}_ENDPOINT`])
-          .executeTakeFirst()
-        return res?.cursor
-      },
       service: env[`FEEDGEN_SUBSCRIPTION_${env.FEEDGEN_SUBSCRIPTION_MODE.toUpperCase()}_ENDPOINT`],
       subscriptionReconnectDelay: env.FEEDGEN_SUBSCRIPTION_RECONNECT_DELAY,
       unauthenticatedCommits: false,
       unauthenticatedHandles: false,
       compress: true,
-      filterCollections: [ids.AppBskyFeedPost],
+      filterCollections: [ids.AppBskyFeedPost, ids.AppBskyFeedRepost, ids.AppBskyGraphList, ids.AppBskyGraphListitem],
       excludeIdentity: true,
-      excludeAccount: true,
+      excludeAccount: false,
       excludeCommit: false,
       excludeSync: true,
     })
@@ -90,7 +83,6 @@ export class FeedGenerator {
 
   async start() {
     this.ctx.logger.info('Starting server...')
-    await migrateToLatest(this.ctx.db)
     this.ingester.start()
     this.server = this.app.listen(env.FEEDGEN_PORT, env.FEEDGEN_LISTENHOST)
     await events.once(this.server, 'listening')

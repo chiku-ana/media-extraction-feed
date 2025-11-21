@@ -1,29 +1,59 @@
 import { Kysely, type Migration, type MigrationProvider } from 'kysely'
 
-const migrations: Record<string, Migration> = {}
+const mainMigrations: Record<string, Migration> = {}
 
-export const migrationProvider: MigrationProvider = {
+export const mainMigrationProvider: MigrationProvider = {
   async getMigrations() {
-    return migrations
+    return mainMigrations
   },
 }
 
-migrations['001'] = {
+mainMigrations['001'] = {
+  async up(db: Kysely<unknown>) {
+    await db.schema
+      .createTable('list')
+      .addColumn('uri', 'varchar', (col) => col.primaryKey())
+      .addColumn('algoShortname', 'varchar', (col) => col.notNull())
+      .execute()
+    await db.schema
+      .createTable('listitem')
+      .addColumn('uri', 'varchar', (col) => col.primaryKey())
+      .addColumn('list', 'varchar', (col) => col.notNull())
+      .addColumn('subject', 'varchar', (col) => col.notNull())
+      .execute()
+  },
+  async down(db: Kysely<unknown>) {
+    await db.schema.dropTable('list').execute()
+    await db.schema.dropTable('listitem').execute()
+  },
+}
+
+const tLMigrations: Record<string, Migration> = {}
+
+export const tLMigrationProvider: MigrationProvider = {
+  async getMigrations() {
+    return tLMigrations
+  },
+}
+
+tLMigrations['001'] = {
   async up(db: Kysely<unknown>) {
     await db.schema
       .createTable('post')
       .addColumn('uri', 'varchar', (col) => col.primaryKey())
-      .addColumn('cid', 'varchar', (col) => col.notNull())
+      .addColumn('repost', 'varchar')
+      .addColumn('cursor', 'varchar', (col) => col.notNull())
       .addColumn('indexedAt', 'varchar', (col) => col.notNull())
       .execute()
     await db.schema
-      .createTable('sub_state')
-      .addColumn('service', 'varchar', (col) => col.primaryKey())
-      .addColumn('cursor', 'integer', (col) => col.notNull())
+      .createTable('repost')
+      .addColumn('uri', 'varchar', (col) => col.primaryKey())
+      .addColumn('subject', 'varchar', (col) => col.notNull())
+      .addColumn('indexedAt', 'varchar', (col) => col.notNull())
       .execute()
   },
   async down(db: Kysely<unknown>) {
     await db.schema.dropTable('post').execute()
-    await db.schema.dropTable('sub_state').execute()
+    await db.schema.dropTable('repost').execute()
   },
 }

@@ -1,10 +1,10 @@
-import algos from '../algos'
+import { AtUri } from '@atproto/syntax'
+import { InvalidRequestError } from '@atproto/xrpc-server'
+import { algos } from '../algos'
 import { validateAuth } from '../auth'
 import { Server } from '../lexicon'
 import { ids } from '../lexicon/lexicons'
 import { type AppContext, env } from '../util/config'
-import { AtUri } from '@atproto/syntax'
-import { InvalidRequestError } from '@atproto/xrpc-server'
 
 export default function (server: Server, ctx: AppContext) {
   server.app.bsky.feed.getFeedSkeleton(async ({ params, req }) => {
@@ -20,17 +20,14 @@ export default function (server: Server, ctx: AppContext) {
         'UnsupportedAlgorithm',
       )
     }
-    /**
-     * Example of how to check auth if giving user-specific results:
-     *
-     * const requesterDid = await validateAuth(
-     *   req,
-     *   ctx.cfg.serviceDid,
-     *   ctx.didResolver,
-     * )
-     */
+    
+    const requesterDid = await validateAuth(
+      req,
+      env.FEEDGEN_SERVICE_DID,
+      ctx.didResolver,
+    )
 
-    const body = await algo(ctx, params)
+    const body = await algo(ctx, params, requesterDid)
     return {
       encoding: 'application/json',
       body: body,

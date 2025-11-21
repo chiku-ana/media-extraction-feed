@@ -17,28 +17,29 @@
   "author": "dholms <dtholmgren@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@atproto/api": "^0.16.9",
+    "@atproto/api": "^0.16.11",
+    "@atproto/crypto": "^0.4.4",
     "@atproto/identity": "^0.4.9",
     "@atproto/lexicon": "^0.4.14",
     "@atproto/syntax": "^0.4.1",
-    "@atproto/xrpc-server": "^0.9.5",
+    "@atproto/xrpc-server": "^0.9.6",
     "atingester": "^1.0.0",
     "better-sqlite3": "^11.10.0",
     "dotenv": "^16.6.1",
-    "envalid": "^8.1.0",
+    "envalid": "^8.1.1",
     "express": "^4.21.2",
     "kysely": "^0.27.6",
     "multiformats": "^9.9.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
-    "@types/express": "^4.17.23",
-    "@types/node": "^20.19.14",
+    "@types/express": "^4.17.25",
+    "@types/node": "^20.19.25",
     "atlpm": "^3.1.2",
-    "inquirer": "^12.9.4",
-    "rimraf": "^6.0.1",
+    "inquirer": "^12.11.1",
+    "rimraf": "^6.1.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">= 18",

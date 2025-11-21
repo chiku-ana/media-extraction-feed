@@ -1,10 +1,15 @@
-import { type QueryParams } from '../lexicon/types/app/bsky/feed/getFeedSkeleton'
+/*import {
+  type QueryParams,
+  type OutputSchema as AlgoOutput,
+} from '../lexicon/types/app/bsky/feed/getFeedSkeleton'
 import { type AppContext } from '../util/config'
 
 // max 15 chars
-export const shortname = 'whats-alf'
+export const shortname = 'extract-media-3'
 
-export const handler = async (ctx: AppContext, params: QueryParams) => {
+export const listname = 'for Extract Media 3'
+
+export const handler = async (ctx: AppContext, params: QueryParams, requesterDid: string): Promise<AlgoOutput> => {
   let builder = ctx.db
     .selectFrom('post')
     .selectAll()
@@ -32,4 +37,4 @@ export const handler = async (ctx: AppContext, params: QueryParams) => {
     cursor,
     feed,
   }
-}
+}*/

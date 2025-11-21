@@ -1,15 +1,33 @@
-export type DatabaseSchema = {
+export type MainDatabaseSchema = {
+  list: List
+  listitem: Listitem
+}
+
+export type List = {
+  uri: string
+  algoShortname: string
+}
+
+export type Listitem = {
+  uri: string
+  list: string
+  subject: string
+}
+
+export type TLDatabaseSchema = {
   post: Post
-  sub_state: SubState
+  repost: Repost
 }
 
 export type Post = {
   uri: string
-  cid: string
+  repost?: string
+  cursor: string
   indexedAt: string
 }
 
-export type SubState = {
-  service: string
-  cursor: number
+export type Repost = {
+  uri: string
+  subject: string
+  indexedAt: string
 }

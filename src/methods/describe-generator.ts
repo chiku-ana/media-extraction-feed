@@ -1,8 +1,8 @@
-import algos from '../algos'
+import { AtUri } from '@atproto/syntax'
+import { algos } from '../algos'
 import { Server } from '../lexicon'
 import { ids } from '../lexicon/lexicons'
 import { env } from '../util/config'
-import { AtUri } from '@atproto/syntax'
 
 export default function (server: Server) {
   server.app.bsky.feed.describeFeedGenerator(async () => {

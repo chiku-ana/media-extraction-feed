@@ -1,11 +1,11 @@
 import dotenv from 'dotenv'
 import { cleanEnv, host, num, port, str, testOnly, url } from 'envalid'
 import { DidResolver } from '@atproto/identity'
-import { type Database } from '../db'
+import { type MainDatabase } from '../db'
 import { type Logger } from './logger'
 
 export type AppContext = {
-  db: Database
+  db: MainDatabase
   didResolver: DidResolver
   logger: Logger
 }
@@ -23,8 +23,8 @@ export const env = cleanEnv(process.env, {
   FEEDGEN_LISTENHOST: host({
     devDefault: testOnly('localhost'),
   }),
-  FEEDGEN_SQLITE_LOCATION: str({
-    devDefault: ':memory:',
+  FEEDGEN_DATA_DIRECTORY: str({
+    devDefault: './data',
   }),
   FEEDGEN_SUBSCRIPTION_MODE: str({
     devDefault: testOnly('Firehose'),
