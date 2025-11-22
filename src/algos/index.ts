@@ -5,22 +5,22 @@ import {
   type OutputSchema as AlgoOutput,
 } from '../lexicon/types/app/bsky/feed/getFeedSkeleton'
 import { type AppContext } from '../util/config'
-/*import * as extractMedia1 from './extract-media-1'
+import * as extractMedia1 from './extract-media-1'
 import * as extractMedia2 from './extract-media-2'
-import * as extractMedia3 from './extract-media-3'*/
+import * as extractMedia3 from './extract-media-3'
 
 type AlgoHandler = (ctx: AppContext, params: QueryParams, requesterDid: string) => Promise<AlgoOutput>
 
 export const algos: Record<string, AlgoHandler> = {
-  /*[extractMedia1.shortname]: extractMedia1.handler,
+  [extractMedia1.shortname]: extractMedia1.handler,
   [extractMedia2.shortname]: extractMedia2.handler,
-  [extractMedia3.shortname]: extractMedia3.handler,*/
+  [extractMedia3.shortname]: extractMedia3.handler,
 }
 
 export const algoShortnames: Record<string, string> = {
-  /*[extractMedia1.listname]: extractMedia1.shortname,
+  [extractMedia1.listname]: extractMedia1.shortname,
   [extractMedia2.listname]: extractMedia2.shortname,
-  [extractMedia3.listname]: extractMedia3.shortname,*/
+  [extractMedia3.listname]: extractMedia3.shortname,
 }
 
 type RecordType = {
@@ -49,7 +49,7 @@ export const getAllRecordLists = async (repo: string, collection: string, record
     })
     if (!res.success) throw new Error()
     records.push(...res.data.records)
-    if (res.data.records.length >= 100) await getAllRecordLists(repo, collection, records, agent, res.data.cursor)
+    if (res.data.cursor) await getAllRecordLists(repo, collection, records, agent, res.data.cursor)
   } catch {
     await getAllRecordLists(repo, collection, records, agent, cursor)
   }

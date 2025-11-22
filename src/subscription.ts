@@ -12,6 +12,7 @@ import { type Main as RecordWithMedia } from './lexicon/types/app/bsky/embed/rec
 import { type Main as Video } from './lexicon/types/app/bsky/embed/video'
 import { type Record as PostRecord } from './lexicon/types/app/bsky/feed/post'
 import { type Record as RepostRecord } from './lexicon/types/app/bsky/feed/repost'
+import { type ListItemView } from './lexicon/types/app/bsky/graph/defs'
 import { type Record as ListRecord } from './lexicon/types/app/bsky/graph/list'
 import { type Record as ListitemRecord } from './lexicon/types/app/bsky/graph/listitem'
 
@@ -88,6 +89,17 @@ export const handleEvent = async (evt: IngesterEvent, db: MainDatabase): Promise
             }))
           )
           .execute()
+        for (const item of await getAllListItems(evt.uri.toString())) {
+          await db
+            .insertInto('listitem')
+            .values({
+              uri: item.uri,
+              list: evt.uri.toString(),
+              subject: item.subject.did,
+            })
+            .onConflict((oc) => oc.doNothing())
+            .execute()
+        }
       }
     } else if (evt.collection === ids.AppBskyGraphListitem && isListitem(evt.record)) {
       const list = await db
@@ -125,6 +137,17 @@ export const handleEvent = async (evt: IngesterEvent, db: MainDatabase): Promise
             }))
           )
           .execute()
+        for (const item of await getAllListItems(evt.uri.toString())) {
+          await db
+            .insertInto('listitem')
+            .values({
+              uri: item.uri,
+              list: evt.uri.toString(),
+              subject: item.subject.did,
+            })
+            .onConflict((oc) => oc.doNothing())
+            .execute()
+        }
       } else if (await db.selectFrom('list').selectAll().where('uri', '=', evt.uri.toString()).executeTakeFirst()) {
         const res = await db
           .selectFrom('list')
@@ -281,6 +304,22 @@ const getPost = async (agent: AtpAgent, uri: AtUri): Promise<{uri: string, cid: 
   } catch {
     return await getPost(agent, uri)
   }
+}
+
+export const getAllListItems = async (list: string, items: ListItemView[] = [], cursor?: string): Promise<ListItemView[]> => {
+  try {
+    const res = await agent.app.bsky.graph.getList({
+      list,
+      cursor,
+      limit: 100,
+    })
+    if (!res.success) throw new Error()
+    items.push(...res.data.items)
+    if (res.data.cursor) await getAllListItems(list, items, res.data.cursor)
+  } catch {
+    await getAllListItems(list, items, cursor)
+  }
+  return items
 }
 
 export const isImages = (obj: unknown): obj is Images => {
