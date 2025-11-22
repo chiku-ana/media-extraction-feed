@@ -53,8 +53,8 @@ export const getTLDbLocation = async (did: string, algoShortname: string): Promi
   return path.join(await getRepoLocation(did), 'lists', algoShortname, `timeline.sqlite`)
 }
 
-export const getTLDbs = async (db: MainDatabase, did: string): Promise<TLDatabase[]> => {
-  const tLDbs : TLDatabase[] = []
+export const getTLDbs = async (db: MainDatabase, did: string): Promise<{list: string, algoShortname: string, db: TLDatabase}[]> => {
+  const tLDbs : {list: string, algoShortname: string, db: TLDatabase}[] = []
   const listitems = await db
     .selectFrom('listitem')
     .selectAll()
@@ -69,7 +69,7 @@ export const getTLDbs = async (db: MainDatabase, did: string): Promise<TLDatabas
       .executeTakeFirst()
     if (list) {
       const tLDb = await createTLDb(listUri.host, list.algoShortname)
-      if (tLDb) tLDbs.push(tLDb)
+      if (tLDb) tLDbs.push({list: listUri.toString(), algoShortname: list.algoShortname, db: tLDb})
     } else {
       await db
         .deleteFrom('listitem')

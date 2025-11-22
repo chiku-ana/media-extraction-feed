@@ -24,7 +24,7 @@ export const handleEvent = async (evt: IngesterEvent, db: MainDatabase): Promise
       if (isImages(evt.record.embed) || isRecordWithMedia(evt.record.embed) || isVideo(evt.record.embed)) {
         for (const tLDb of await getTLDbs(db, evt.did)) {
           const indexedAt = new Date().toISOString()
-          await tLDb
+          await tLDb.db
             .insertInto('post')
             .values({
               uri: evt.uri.toString(),
@@ -41,7 +41,7 @@ export const handleEvent = async (evt: IngesterEvent, db: MainDatabase): Promise
         const repostedPost = await getPost(agent, repostedPostUri)
         if (isImages(repostedPost.value.embed) || isRecordWithMedia(repostedPost.value.embed) || isVideo(repostedPost.value.embed)) {
           const indexedAt = new Date().toISOString()
-          await tLDb
+          await tLDb.db
             .insertInto('post')
             .values({
               uri: evt.record.subject.uri,
@@ -57,7 +57,7 @@ export const handleEvent = async (evt: IngesterEvent, db: MainDatabase): Promise
               }))
             )
             .execute()
-          await tLDb
+          await tLDb.db
             .insertInto('repost')
             .values({
               uri: evt.uri.toString(),
@@ -173,35 +173,35 @@ export const handleEvent = async (evt: IngesterEvent, db: MainDatabase): Promise
   if (evt.event === 'delete') {
     if (evt.collection === ids.AppBskyFeedPost) {
       for (const tLDb of await getTLDbs(db, evt.did)) {
-        await tLDb
+        await tLDb.db
           .deleteFrom('post')
           .where('uri', '=', evt.uri.toString())
           .execute()
-        await tLDb
+        await tLDb.db
           .deleteFrom('repost')
           .where('subject', '=', evt.uri.toString())
           .execute()
       }
     } else if (evt.collection === ids.AppBskyFeedRepost) {
       for (const tLDb of await getTLDbs(db, evt.did)) {
-        const res = await tLDb
+        const res = await tLDb.db
           .selectFrom('repost')
           .selectAll()
           .where('uri', '=', evt.uri.toString())
           .executeTakeFirst()
         if (res) {
-          await tLDb
+          await tLDb.db
             .deleteFrom('repost')
             .where('uri', '=', evt.uri.toString())
             .execute()
-          const repost = await tLDb
+          const repost = await tLDb.db
             .selectFrom('repost')
             .selectAll()
             .where('subject', '=', res.subject)
             .orderBy('indexedAt', 'desc')
             .executeTakeFirst()
           if (repost) {
-            await tLDb
+            await tLDb.db
               .insertInto('post')
               .values({
                 uri: res.subject,
@@ -218,27 +218,40 @@ export const handleEvent = async (evt: IngesterEvent, db: MainDatabase): Promise
               )
               .execute()
           } else {
-            const post = await tLDb
-              .selectFrom('post')
+            const item = await db
+              .selectFrom('listitem')
               .selectAll()
-              .where('uri', '=', res.subject)
+              .where('list', '=', tLDb.list)
+              .where('subject', '=', new AtUri(res.subject).host)
               .executeTakeFirst()
-            const indexedAt = post ? post.indexedAt : (await getPost(agent, new AtUri(res.subject))).value.indexedAt as string
-            await tLDb
-              .insertInto('post')
-              .values({
-                uri: res.subject,
-                cursor: indexedAt,
-                indexedAt,
-              })
-              .onConflict((oc) => oc
-                .column('uri')
-                .doUpdateSet((eb) => ({
-                  repost: eb.ref('excluded.repost'),
-                  cursor: eb.ref('excluded.cursor'),
-                }))
-              )
-              .execute()
+            if (item) {
+              const post = await tLDb.db
+                .selectFrom('post')
+                .selectAll()
+                .where('uri', '=', res.subject)
+                .executeTakeFirst()
+              const indexedAt = post ? post.indexedAt : (await getPost(agent, new AtUri(res.subject))).value.indexedAt as string
+              await tLDb.db
+                .insertInto('post')
+                .values({
+                  uri: res.subject,
+                  cursor: indexedAt,
+                  indexedAt,
+                })
+                .onConflict((oc) => oc
+                  .column('uri')
+                  .doUpdateSet((eb) => ({
+                    repost: eb.ref('excluded.repost'),
+                    cursor: eb.ref('excluded.cursor'),
+                  }))
+                )
+                .execute()
+            } else {
+              await tLDb.db
+                .deleteFrom('post')
+                .where('uri', '=', res.subject)
+                .execute()
+            }
           }
         }
       }
@@ -271,11 +284,11 @@ export const handleEvent = async (evt: IngesterEvent, db: MainDatabase): Promise
   if (evt.event === 'account') {
     if (evt.status === 'deleted') {
       for (const tLDb of await getTLDbs(db, evt.did)) {
-        await tLDb
+        await tLDb.db
           .deleteFrom('post')
           .where('uri', 'like', `at://${evt.did}/%`)
           .execute()
-        await tLDb
+        await tLDb.db
           .deleteFrom('repost')
           .where('uri', 'like', `at://${evt.did}/%`)
           .execute()
