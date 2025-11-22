@@ -27,8 +27,8 @@ importers:
         specifier: ^0.9.6
         version: 0.9.6
       atingester:
-        specifier: ^1.0.0
-        version: 1.0.0
+        specifier: ^1.0.1
+        version: 1.0.1
       better-sqlite3:
         specifier: ^11.10.0
         version: 11.10.0
@@ -418,8 +418,8 @@ packages:
   array-flatten@1.1.1:
     resolution: {integrity: sha512-PCVAQswWemu6UdxsDFFX/+gVeYqKAod3D3UVm91jHwynguOwAvYPhx8nNlM++NqRcK6CxxpUafjmhIdKiHibqg==}
 
-  atingester@1.0.0:
-    resolution: {integrity: sha512-ZoP3pw2q2KxruQiThj8wlNtsDZuRalQaiU7lnhM5dYUx4bQRgVuHb7UyXwifgxRc/aovHkoF8qj0j8Rf/1SM9g==}
+  atingester@1.0.1:
+    resolution: {integrity: sha512-RwHlbX7En3rsinY07SBbaxSXGzLd7HzL/biaVYiitejoPRvXohnuDJsXppG6z3PFnGEnWh2PneKIrScJf6UOmA==}
     engines: {node: '>= 18.7.0'}
 
   atlpm@3.1.2:
@@ -1596,7 +1596,7 @@ snapshots:
 
   array-flatten@1.1.1: {}
 
-  atingester@1.0.0:
+  atingester@1.0.1:
     dependencies:
       '@atproto/common': 0.4.12
       '@atproto/common-web': 0.4.3
@@ -1605,6 +1605,7 @@ snapshots:
       '@atproto/repo': 0.8.10
       '@atproto/sync': 0.1.37
       '@atproto/syntax': 0.4.1
+      '@atproto/ws-client': 0.0.2
       '@atproto/xrpc-server': 0.9.6
       '@bokuweb/zstd-wasm': 0.0.27
       multiformats: 9.9.0

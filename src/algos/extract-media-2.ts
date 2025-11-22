@@ -54,10 +54,10 @@ export const handler = async (ctx: AppContext, params: QueryParams, requesterDid
               .onConflict((oc) => oc.doNothing())
               .execute()
           }
-          return {feed: [{post: 'at://did:plc:rmpcdvowarn4rcz4slzl76k2/app.bsky.feed.post/3m67yev6u7c2q'}]} // さくせいしました
+          return {feed: [{post: 'at://did:plc:rmpcdvowarn4rcz4slzl76k2/app.bsky.feed.post/3m67yev6u7c2q'}]}
         }
       }
-      return {feed: [{post: 'at://did:plc:rmpcdvowarn4rcz4slzl76k2/app.bsky.feed.post/3m67zkeeib22q'}]} // feedの紹介文
+      return {feed: [{post: 'at://did:plc:rmpcdvowarn4rcz4slzl76k2/app.bsky.feed.post/3m67zkeeib22q'}]}
     }
   }
 
@@ -66,7 +66,7 @@ export const handler = async (ctx: AppContext, params: QueryParams, requesterDid
     if (params.cursor) {
       return {feed: []}
     } else {
-      return {feed: [{post: 'at://did:plc:rmpcdvowarn4rcz4slzl76k2/app.bsky.feed.post/3m67ygh56os2q'}]} // db読み込みエラー
+      return {feed: [{post: 'at://did:plc:rmpcdvowarn4rcz4slzl76k2/app.bsky.feed.post/3m67ygh56os2q'}]}
     }
   }
   let builder = tLDb
@@ -83,6 +83,10 @@ export const handler = async (ctx: AppContext, params: QueryParams, requesterDid
 
   const feed = res.map((row) => ({
     post: row.uri,
+    reason: row.repost ? {
+        $type: 'app.bsky.feed.defs#skeletonReasonRepost',
+        repost: row.repost
+    } : undefined,
   }))
 
   let cursor: string | undefined
